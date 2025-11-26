@@ -1,0 +1,28 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # веб-админка http://localhost:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  delivery-service:
+    build: .
+    container_name: delivery-service
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3000:3000" # HTTP API + Swagger http://localhost:3000/docs
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: delivery_pricing
+    # если есть .env и хочешь часть переменных оттуда:
+    # env_file:
+    #   - .env
